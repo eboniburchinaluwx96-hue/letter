@@ -83,7 +83,7 @@ document.addEventListener("DOMContentLoaded", () => {
   /* ==============================
      FORM SUBMIT
   ============================== */
-  form.addEventListener("submit", async (e) => {
+  form.addEventListener("/submit", async (e) => {
     e.preventDefault();
 
     const submitBtn = form.querySelector('button[type="submit"]');
