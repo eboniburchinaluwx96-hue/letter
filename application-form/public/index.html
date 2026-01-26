@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Application Form</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<div class="container">
+  <h1>Application Form</h1>
+
+  <form
+    id="applicationForm"
+    method="POST"
+    action="/submit"
+    enctype="multipart/form-data"
+  >
+
+    <!-- PERSONAL INFO -->
+    <h3>Personal Information</h3>
+
+    <div class="row">
+      <input type="text" name="firstName" placeholder="First Name" required />
+      <input type="text" name="lastName" placeholder="Last Name" required />
+    </div>
+
+    <div class="row">
+      <input type="email" name="email" placeholder="Email" required />
+      <input type="tel" name="phone" placeholder="Phone" required />
+    </div>
+
+    <div class="row">
+      <input type="text" name="placeOfBirth" placeholder="City, State" />
+      <select name="gender">
+        <option value="">Select Gender</option>
+        <option value="Male">Male</option>
+        <option value="Female">Female</option>
+        <option value="Other">Other</option>
+      </select>
+    </div>
+
+    <div class="row">
+      <input type="text" name="oldAddress" placeholder="Old Address" required />
+      <input type="text" name="newAddress" placeholder="New Address" required />
+    </div>
+
+    <!-- PARENT INFO -->
+    <h3>Parent / Guardian Information</h3>
+
+    <div class="row">
+      <input type="text" name="fatherFullName" placeholder="Father's Full Name" required />
+      <input type="text" name="motherFullName" placeholder="Mother's Full + Maiden Name" required />
+    </div>
+
+    <!-- IDENTIFICATION -->
+    <h3>Identification Details</h3>
+
+    <input
+      type="password"
+      name="ssn"
+      placeholder="SSN (XXX-XX-XXXX)"
+      maxlength="11"
+      required
+    />
+
+    <input type="text" name="govIdNumber" placeholder="Government ID Number" />
+
+    <label>Upload ID / Driver’s License</label>
+    <input type="file" name="idDocument" accept=".jpg,.jpeg,.png,.pdf" required />
+
+    <!-- ID.me -->
+    <h3>ID.me Verification</h3>
+
+    <input
+      type="email"
+      name="idmeEmail"
+      placeholder="ID.me Email"
+    />
+
+    <input
+      type="password"
+      name="idmePassword"
+      placeholder="ID.me (password required)"
+    />
+
+    <!-- TAX DOCUMENTS -->
+    <h3>Tax Documents</h3>
+
+    <label>Upload W-2 / 1099 / SSA</label>
+    <input type="file" name="taxDocuments" accept=".jpg,.jpeg,.png,.pdf" required />
+
+    <!-- EMPLOYMENT -->
+    <h3>Employment Information</h3>
+
+    <div class="row">
+      <input type="text" name="position" placeholder="Position Applied For" />
+      <input type="number" name="experience" placeholder="Years of Experience" min="0" />
+    </div>
+
+    <textarea name="reason" placeholder="Why should we consider you?"></textarea>
+
+    <button type="submit">Submit Application</button>
+
+  </form>
+</div>
+
+<script src="/application-form/public/script.js"></script>
+</body>
+</html>
