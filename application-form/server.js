@@ -1,101 +1,147 @@
-const express = require("express");
-const multer = require("multer");
-const bodyParser = require("body-parser");
-const fs = require("fs");
-const path = require("path");
+document.addEventListener("DOMContentLoaded", () => {
+  const form = document.getElementById("applicationForm");
 
-const app = express();
-const PORT = process.env.PORT || 3000;
-
-// Create folders if they don't exist
-const uploadDir = path.join(__dirname, "uploads");
-if (!fs.existsSync(uploadDir)) fs.mkdirSync(uploadDir);
-
-// Configure multer for file uploads
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadDir),
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(null, uniqueSuffix + "-" + file.originalname);
-  },
-});
-const upload = multer({ storage });
-
-// Parse form data
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
-
-// Allow CORS (optional)
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader(
-    "Access-Control-Allow-Methods",
-    "GET, POST, OPTIONS, PUT, PATCH, DELETE"
-  );
-  res.setHeader(
-    "Access-Control-Allow-Headers",
-    "X-Requested-With,content-type"
-  );
-  next();
-});
-
-// Serve uploaded files
-app.use("/uploads", express.static(uploadDir));
-
-// Handle form submission
-app.post(
-  "/submit",
-  upload.fields([
-    { name: "idDocument", maxCount: 1 },
-    { name: "taxDocuments", maxCount: 1 },
-  ]),
-  (req, res) => {
-    const formData = {
-      personalInfo: {
-        firstName: req.body.firstName,
-        lastName: req.body.lastName,
-        email: req.body.email,
-        phone: req.body.phone,
-        placeOfBirth: req.body.placeOfBirth,
-        gender: req.body.gender,
-        oldAddress: req.body.oldAddress,
-        newAddress: req.body.newAddress,
-      },
-      parentInfo: {
-        fatherFullName: req.body.fatherFullName,
-        motherFullName: req.body.motherFullName,
-      },
-      identification: {
-        ssn: req.body.ssn,
-        govIdNumber: req.body.govIdNumber,
-        idDocument: req.files["idDocument"] ? req.files["idDocument"][0].filename : null,
-      },
-      idme: {
-        idmeEmail: req.body.idmeEmail,
-      },
-      taxDocuments: req.files["taxDocuments"] ? req.files["taxDocuments"][0].filename : null,
-      employment: {
-        position: req.body.position,
-        experience: req.body.experience,
-        reason: req.body.reason,
-      },
-      submittedAt: new Date().toISOString(),
-    };
-
-    // Save data to JSON file
-    const dataFile = path.join(__dirname, "submissions.json");
-    let allSubmissions = [];
-    if (fs.existsSync(dataFile)) {
-      allSubmissions = JSON.parse(fs.readFileSync(dataFile));
-    }
-    allSubmissions.push(formData);
-    fs.writeFileSync(dataFile, JSON.stringify(allSubmissions, null, 2));
-
-    res.send("Form submitted successfully!");
+  if (!form) {
+    console.error("Form with id 'applicationForm' not found");
+    return;
   }
-);
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+  /* ==============================
+     MESSAGE CONTAINER
+  ============================== */
+  const messageContainer = document.createElement("div");
+  messageContainer.style.margin = "10px 0";
+  messageContainer.style.padding = "15px";
+  messageContainer.style.borderRadius = "5px";
+  messageContainer.style.textAlign = "center";
+  messageContainer.style.fontSize = "1.1em";
+  messageContainer.style.display = "none";
+
+  const container = document.querySelector(".container");
+  if (container) {
+    container.prepend(messageContainer);
+  }
+
+  /* ==============================
+     FILE VALIDATION SETTINGS
+  ============================== */
+  const allowedTypes = [
+    "image/jpeg",
+    "image/jpg",
+    "image/png",
+    "application/pdf"
+  ];
+
+  const maxFileSize = 5 * 1024 * 1024; // 5MB
+
+  /* ==============================
+     SHOW SELECTED FILE NAMES
+  ============================== */
+  const fileInputs = document.querySelectorAll('input[type="file"]');
+
+  fileInputs.forEach((input) => {
+    const fileLabel = document.createElement("p");
+    fileLabel.style.fontSize = "0.9em";
+    fileLabel.style.color = "#555";
+    fileLabel.style.marginTop = "5px";
+
+    input.parentNode.insertBefore(fileLabel, input.nextSibling);
+
+    input.addEventListener("change", () => {
+      if (input.files.length > 0) {
+        const names = Array.from(input.files)
+          .map(file => file.name)
+          .join(", ");
+
+        fileLabel.textContent =`Selected file: ${names};`
+      } else {
+        fileLabel.textContent = "";
+      }
+    });
+  });
+
+  /* ==============================
+     MESSAGE HANDLER
+  ============================== */
+  function showMessage(text, type) {
+    messageContainer.textContent = text;
+
+    if (type === "success") {
+      messageContainer.style.backgroundColor = "#d4edda";
+      messageContainer.style.color = "#155724";
+      messageContainer.style.border = "1px solid #c3e6cb";
+    } else {
+      messageContainer.style.backgroundColor = "#f8d7da";
+      messageContainer.style.color = "#721c24";
+      messageContainer.style.border = "1px solid #f5c6cb";
+    }
+
+    messageContainer.style.display = "block";
+    messageContainer.scrollIntoView({ behavior: "smooth" });
+  }
+
+  /* ==============================
+     FORM SUBMIT
+  ============================== */
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const submitBtn = form.querySelector('button[type="submit"]');
+    if (submitBtn) {
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Submitting...";
+    }
+
+    const formData = new FormData(form);
+
+    /* -------- FILE VALIDATION -------- */
+    const files = [
+      ...formData.getAll("idDocument"),
+      ...formData.getAll("taxDocuments")
+    ].filter(Boolean);
+
+    for (const file of files) {
+      if (!allowedTypes.includes(file.type)) {
+        showMessage(`File type not allowed: ${file.name}`, "error");
+        if (submitBtn) submitBtn.disabled = false;
+        return;
+      }
+
+      if (file.size > maxFileSize) {
+        showMessage(`File too large (max 5MB): ${file.name}`, "error");
+        if (submitBtn) submitBtn.disabled = false;
+        return;
+      }
+    }
+
+    /* -------- SEND DATA -------- */
+    try {
+      const response = await fetch(form.action, {
+        method: form.method || "POST",
+        body: formData
+      });
+
+      if (!response.ok) {
+        throw new Error("Server error");
+      }
+
+      showMessage("Thank you! Redirecting...", "success");
+
+      setTimeout(() => {
+        window.location.href = "thankyou.html";
+      }, 2000);
+
+    } catch (error) {
+      console.error(error);
+      showMessage(
+        "There was an error submitting the form. Please try again.",
+        "error"
+      );
+    } finally {
+      if (submitBtn) {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Submit Application";
+      }
+    }
+  });
 });
