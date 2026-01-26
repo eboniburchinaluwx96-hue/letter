@@ -6,7 +6,6 @@
   "scripts": {
     "start": "node server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
-    
   },
   "repository": {
     "type": "git",
@@ -22,7 +21,10 @@
   "homepage": "https://github.com/eboniburchinaluwx96-hue/letter#readme",
   "dependencies": {
     "cors": "^2.8.6",
+    "dotenv": "^17.2.3",
     "express": "^5.2.1",
-    "multer": "^2.0.2"
+    "helmet": "^8.1.0",
+    "multer": "^2.0.2",
+    "nodemailer": "^7.0.13"
   }
 }
